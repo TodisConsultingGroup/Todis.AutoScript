@@ -33,3 +33,7 @@ TestResults.xml
 
 ### Publish output ###
 [Pp]ublish/
+
+### Local application logs ###
+Todis.AutoScript/Logs/*
+!Todis.AutoScript/Logs/.gitkeep

@@ -33,6 +33,13 @@ public sealed class ConfigService
         await JsonSerializer.SerializeAsync(stream, config, new JsonSerializerOptions { WriteIndented = true });
     }
 
+    public void Save(AppConfig config)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+        using var stream = File.Create(_path);
+        JsonSerializer.Serialize(stream, config, new JsonSerializerOptions { WriteIndented = true });
+    }
+
     public static string Protect(string value)
     {
         if (string.IsNullOrEmpty(value)) return string.Empty;

@@ -23,6 +23,10 @@ Po lewej stronie okna podaj:
 
 Kliknij **Testuj połączenie**, a następnie **Zapisz ustawienia**. Konfiguracja zostanie zapamiętana i można ją zmienić w dowolnym momencie.
 
+W prawym górnym rogu sekcji połączenia znajduje się przycisk ze słońcem lub księżycem. Przełącza on motyw **Jasny/Ciemny**. Zmiana działa od razu i jest zapisywana lokalnie dla aktualnego użytkownika.
+
+Możesz również przeciągać krawędzie nagłówków kolumn w tabeli skryptów. Ustawione szerokości zostaną zapisane lokalnie przy zamykaniu programu i odtworzone przy następnym uruchomieniu.
+
 Hasło SQL jest chronione mechanizmem Windows i może zostać odczytane tylko na koncie użytkownika, które je zapisało. Konfiguracja nie trafia do repozytorium.
 
 ## 3. Gdzie umieszczać skrypty
@@ -85,6 +89,8 @@ GO
 
 Program pokazuje aktualny plik, stan każdego skryptu, ogólny postęp i komunikaty w logu.
 
+Lista aktualizuje się automatycznie, gdy podczas działania aplikacji dodasz, usuniesz albo zmienisz nazwę pliku `.sql`. Wykrywane są również nowe i usunięte podfoldery. Podczas wykonywania zestawu lista jest celowo zamrożona; ewentualne zmiany pojawią się zaraz po zakończeniu wykonywania.
+
 ## 6. Obsługa błędów
 
 Program zatrzymuje wykonywanie przy pierwszym błędzie i pokazuje:
@@ -95,13 +101,17 @@ Program zatrzymuje wykonywanie przy pierwszym błędzie i pokazuje:
 
 Każdy plik jest wykonywany w osobnej transakcji. Jeżeli drugi plik zakończy się błędem, pierwszy pozostanie zatwierdzony, drugi zostanie wycofany w całości, a trzeci nie zostanie uruchomiony.
 
-Program nie tworzy tabeli historii ani żadnych innych obiektów technicznych w bazie. Log każdego uruchomienia zapisuje wyłącznie lokalnie w:
+Program nie tworzy tabeli historii ani żadnych innych obiektów technicznych w bazie. Log każdego uruchomienia zapisuje wyłącznie lokalnie w folderze projektu:
 
 ```text
-%LOCALAPPDATA%\Todis.AutoScript\Logs
+Todis.AutoScript\Logs
 ```
 
+Folder jest widoczny w Visual Studio, ale jego logi są ignorowane przez Git i nie trafią na `master`. W gotowej, opublikowanej wersji folder `Logs` powstanie obok pliku programu.
+
 Po poprawieniu błędu sprawdź, czy wcześniejsze pliki można bezpiecznie uruchomić ponownie. Aplikacja celowo nie odczytuje historii z bazy i nie pomija ich automatycznie.
+
+Jeżeli wcześniejsze pliki zostały już wykonane, zaznacz w tabeli poprawiony skrypt i kliknij **Wznów od zaznaczonego**. Program pokaże w potwierdzeniu, od którego pliku zacznie, a wcześniejsze oznaczy jako pominięte. Nie wybieraj tej opcji po zmianie bazy ani wtedy, gdy nie masz pewności, które skrypty zakończyły się wcześniej powodzeniem.
 
 Warto pisać skrypty tak, aby ich ponowne uruchomienie było bezpieczne:
 
