@@ -33,6 +33,7 @@ TestResults.xml
 
 ### Publish output ###
 [Pp]ublish/
+artifacts/
 
 ### Local application logs ###
 Todis.AutoScript/Logs/*
