@@ -12,6 +12,7 @@ public sealed class AppConfig
     public bool TrustServerCertificate { get; set; } = true;
     public string Theme { get; set; } = "Light";
     public List<GridColumnSetting> GridColumns { get; set; } = [];
+    public bool RunInSingleTransaction { get; set; }
 }
 
 public sealed class GridColumnSetting

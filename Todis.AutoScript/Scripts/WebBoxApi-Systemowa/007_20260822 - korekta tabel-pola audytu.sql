@@ -1,4 +1,5 @@
 /*
+Wersja docelowa: 7
 2026-08-22 - pola audytu w najważniejszych tabelach systemowych
 Co zmieniono względem oryginalnego skryptu:
 
@@ -60,24 +61,7 @@ Odpowiedzi na wcześniejsze pytania:
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-DECLARE @RequiredDBVersion int = 6;
 DECLARE @TargetDBVersion int = 7;
-DECLARE @CurrentDBVersion int;
-
-SELECT TOP (1) @CurrentDBVersion = VersionID
-FROM dbo.tSysDBVersion;
-
--- Powtórne uruchomienie zakończy się bez wykonywania zmian.
-IF @CurrentDBVersion = @TargetDBVersion
-BEGIN
-    PRINT N'Pola audytu są już zainstalowane. Wersja bazy: 7.';
-    RETURN;
-END;
-
-IF @CurrentDBVersion <> @RequiredDBVersion
-BEGIN
-    THROW 50001, N'Nieprawidłowa wersja bazy. Skrypt wymaga wersji 6.', 1;
-END;
 
 DECLARE @Tables table
 (
@@ -117,8 +101,6 @@ BEGIN
 END;
 
 BEGIN TRY
-    BEGIN TRANSACTION;
-
     DECLARE @TableName sysname;
     DECLARE @QualifiedTable nvarchar(258);
     DECLARE @Sql nvarchar(max);
@@ -191,7 +173,6 @@ BEGIN TRY
         THROW 50003, N'Nie udało się jednoznacznie zaktualizować wersji bazy.', 1;
     END;
 
-    COMMIT TRANSACTION;
     PRINT N'Zakończono migrację pól audytu. Wersja bazy: 7.';
 END TRY
 BEGIN CATCH
@@ -200,9 +181,6 @@ BEGIN CATCH
 
     IF CURSOR_STATUS(N'local', N'AuditTables') > -3
         DEALLOCATE AuditTables;
-
-    IF XACT_STATE() <> 0
-        ROLLBACK TRANSACTION;
 
     THROW;
 END CATCH;

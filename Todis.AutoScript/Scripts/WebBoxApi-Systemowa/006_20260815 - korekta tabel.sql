@@ -1,4 +1,5 @@
 ﻿/*
+Wersja docelowa: 6
 2026-08-14 - 
 	- usunięcie tabeli tSysPermissionsForUser
 	- nowe pole PermissionID w tabeli tSysAppMenuActions 
@@ -8,15 +9,7 @@
 */
  
  
-DECLARE @RequiredDBVersion INT =5
-
-IF (SELECT TOP 1 VersionID FROM tSysDBVersion) <> @RequiredDBVersion
-      PRINT 'Nieprawidłowa wersja bazy danych!'
-ELSE
-BEGIN
-
-     UPDATE tSysDBVersion          SET VersionID = @RequiredDBVersion + 1
-END
+UPDATE dbo.tSysDBVersion SET VersionID = 6;
 
 
 	DROP TABLE tSysPermissionsForUser

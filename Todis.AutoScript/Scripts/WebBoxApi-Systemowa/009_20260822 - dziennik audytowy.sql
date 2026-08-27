@@ -1,4 +1,5 @@
 /*
+Wersja docelowa: 9
 2026-08-22 - dziennik audytowy zmian danych systemowych
 Odpowiedzi projektowe:
 
@@ -33,23 +34,7 @@ Założenia migracji:
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-DECLARE @RequiredDBVersion int = 8;
 DECLARE @TargetDBVersion int = 9;
-DECLARE @CurrentDBVersion int;
-
-SELECT TOP (1) @CurrentDBVersion = VersionID
-FROM dbo.tSysDBVersion;
-
-IF @CurrentDBVersion = @TargetDBVersion
-BEGIN
-    PRINT N'Tabela tSysAuditLog jest już zainstalowana. Wersja bazy: 9.';
-    RETURN;
-END;
-
-IF @CurrentDBVersion <> @RequiredDBVersion
-BEGIN
-    THROW 50001, N'Nieprawidłowa wersja bazy. Skrypt wymaga wersji 8.', 1;
-END;
 
 IF OBJECT_ID(N'dbo.tSysAuditLog', N'U') IS NOT NULL
 BEGIN
@@ -57,8 +42,6 @@ BEGIN
 END;
 
 BEGIN TRY
-    BEGIN TRANSACTION;
-
     CREATE TABLE dbo.tSysAuditLog
     (
         AuditLogID bigint IDENTITY(1,1) NOT NULL,
@@ -106,12 +89,8 @@ BEGIN TRY
         THROW 50003, N'Nie udało się jednoznacznie zaktualizować wersji bazy.', 1;
     END;
 
-    COMMIT TRANSACTION;
     PRINT N'Utworzono tSysAuditLog. Wersja bazy: 9.';
 END TRY
 BEGIN CATCH
-    IF XACT_STATE() <> 0
-        ROLLBACK TRANSACTION;
-
     THROW;
 END CATCH;

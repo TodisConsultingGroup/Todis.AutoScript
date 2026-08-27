@@ -50,16 +50,15 @@ Można również kliknąć **Zmień folder główny…** i wskazać inną lokali
 
 ## 4. Kolejność wykonywania
 
-Pliki `.sql` są sortowane alfabetycznie. Kolejność określaj numerem na początku nazwy:
+Pierwsza grupa cyfr w nazwie oznacza **docelową wersję bazy**. Pliki są sortowane po nazwie:
 
 ```text
-001_pierwszy_krok.sql
-002_drugi_krok.sql
-003_trzeci_krok.sql
-010_pozniejszy_krok.sql
+006_20260815_opis.sql
+007_20260822_opis.sql
+008_20260822_opis.sql
 ```
 
-Używaj zawsze tej samej liczby cyfr. Aplikacja obsługuje separatory partii `GO` i `GO n`.
+Używaj zawsze co najmniej trzech cyfr. Przed każdym plikiem aplikacja sprawdza, czy aktualna wersja jest o jeden niższa od wersji w nazwie, a po wykonaniu potwierdza wersję docelową. Kontroli wersji nie należy powielać wewnątrz skryptów. Aplikacja obsługuje separatory `GO` i `GO n`.
 
 ## 5. Uruchamianie skryptów
 
@@ -76,11 +75,16 @@ Lista aktualizuje się automatycznie po dodaniu, usunięciu lub zmianie nazwy pl
 
 Program zatrzymuje się przy pierwszym błędzie i pokazuje nazwę skryptu, numer linii oraz komunikat SQL Server.
 
-Każdy plik działa w osobnej transakcji. Jeżeli drugi plik zakończy się błędem, pierwszy pozostanie zatwierdzony, drugi zostanie wycofany, a trzeci nie zostanie uruchomiony.
+Domyślnie każdy plik działa w osobnej transakcji. Błąd zatrzymuje kolejkę, ale nie wycofuje wcześniej zatwierdzonych plików.
+
+Opcja **Uruchom cały zestaw w jednej transakcji** obejmuje wszystkie pliki wspólną transakcją. W tym trybie błąd dowolnego skryptu wycofuje cały zestaw. Skrypty SQL nie powinny samodzielnie otwierać ani zatwierdzać transakcji.
 
 Program nie tworzy tabel historii ani innych obiektów technicznych w bazie. Logi zapisuje lokalnie w `Todis.AutoScript\Logs`. Są ignorowane przez Git, a w opublikowanej wersji folder `Logs` powstaje obok EXE.
 
-Jeżeli wcześniejsze pliki zostały wykonane, zaznacz poprawiony skrypt i kliknij **Wznów od zaznaczonego**. Nie używaj tej opcji po zmianie bazy ani bez pewności, które pliki zakończyły się powodzeniem.
+Po poprawieniu błędu:
+
+- w trybie osobnych transakcji zaznacz pierwszy niewykonany skrypt i kliknij **Wznów od zaznaczonego**,
+- w trybie jednej transakcji uruchom cały zestaw ponownie, ponieważ poprzednia transakcja została wycofana.
 
 ## 7. Skrypty w repozytorium
 

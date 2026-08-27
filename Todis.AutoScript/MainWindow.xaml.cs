@@ -55,6 +55,7 @@ public partial class MainWindow : Window
         UserNameTextBox.Text = _config.UserName;
         PasswordInput.Password = ConfigService.Unprotect(_config.ProtectedPassword);
         TrustCertificateCheckBox.IsChecked = _config.TrustServerCertificate;
+        SingleTransactionCheckBox.IsChecked = _config.RunInSingleTransaction;
         ApplyTheme(_config.Theme);
         ApplyGridColumnSettings();
         ScriptsRootTextBox.Text = _config.ScriptsRoot;
@@ -74,7 +75,8 @@ public partial class MainWindow : Window
             ScriptsRoot = ScriptsRootTextBox.Text, SelectedFolder = ScriptFolderComboBox.SelectedItem?.ToString() ?? string.Empty,
             TrustServerCertificate = TrustCertificateCheckBox.IsChecked == true,
             Theme = _currentTheme,
-            GridColumns = ReadGridColumnSettings()
+            GridColumns = ReadGridColumnSettings(),
+            RunInSingleTransaction = SingleTransactionCheckBox.IsChecked == true
         };
     }
 
@@ -261,23 +263,31 @@ public partial class MainWindow : Window
 
     private async void ResumeScriptsClick(object sender, RoutedEventArgs e)
     {
-        if (ScriptsGrid.SelectedItem is not ScriptRunItem selected)
-        {
-            MessageBox.Show("Najpierw zaznacz w tabeli skrypt, od którego chcesz wznowić.", "Wybierz skrypt", MessageBoxButton.OK, MessageBoxImage.Information);
-            return;
-        }
-        await RunScriptsAsync(_scripts.IndexOf(selected));
+        if (ScriptsGrid.SelectedItem is ScriptRunItem selected)
+            await RunScriptsAsync(_scripts.IndexOf(selected));
     }
 
-    private void ScriptsGridSelectionChanged(object sender, SelectionChangedEventArgs e) =>
-        ResumeButton.IsEnabled = !_isRunning && ScriptsGrid.SelectedItem is ScriptRunItem;
+    private void ScriptsGridSelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateResumeButton();
+    private void TransactionModeChanged(object sender, RoutedEventArgs e) => UpdateResumeButton();
+
+    private void UpdateResumeButton()
+    {
+        if (!IsInitialized) return;
+        ResumeButton.IsEnabled = !_isRunning &&
+            SingleTransactionCheckBox.IsChecked != true &&
+            ScriptsGrid.SelectedItem is ScriptRunItem;
+    }
 
     private async Task RunScriptsAsync(int startIndex)
     {
         if (_scripts.Count == 0) { MessageBox.Show("Wybrany folder nie zawiera plików .sql.", "Brak skryptów", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        var singleTransaction = SingleTransactionCheckBox.IsChecked == true;
+        if (singleTransaction) startIndex = 0;
         var scriptsToRun = _scripts.Skip(startIndex).ToList();
-        var resumeText = startIndex > 0 ? $"\nPominięte zostaną pliki 1–{startIndex}." : string.Empty;
-        var answer = MessageBox.Show($"Uruchomić {scriptsToRun.Count} skryptów na bazie „{DatabaseTextBox.Text}”, zaczynając od „{scriptsToRun[0].FileName}”?{resumeText}\n\nProces zatrzyma się na pierwszym błędzie.", "Potwierdź uruchomienie", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        var transactionInfo = singleTransaction
+            ? "Wszystkie skrypty zostaną wykonane w jednej transakcji. Błąd wycofa cały zestaw."
+            : "Każdy skrypt zostanie zatwierdzony osobno. Błąd nie wycofa wcześniejszych skryptów.";
+        var answer = MessageBox.Show($"Uruchomić {scriptsToRun.Count} skryptów na bazie „{DatabaseTextBox.Text}”, zaczynając od „{scriptsToRun[0].FileName}”?\n\n{transactionInfo}", "Potwierdź uruchomienie", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
         try
         {
@@ -295,7 +305,7 @@ public partial class MainWindow : Window
             RunProgress.Maximum = scriptsToRun.Count;
             RunProgress.Value = 0;
             var progress = new Progress<(int Completed, string Message)>(p => { RunProgress.Value = p.Completed; AppendLog(p.Message); });
-            await _sqlService.ExecuteAsync(BuildConnectionString(), scriptsToRun, progress, CancellationToken.None);
+            await _sqlService.ExecuteAsync(BuildConnectionString(), scriptsToRun, singleTransaction, progress, CancellationToken.None);
             AppendLog("Wszystkie skrypty wykonano poprawnie.");
             AppendLog($"Log zapisano w: {_currentLogPath}");
             MessageBox.Show("Wszystkie skrypty wykonano poprawnie.", "Gotowe", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -311,7 +321,7 @@ public partial class MainWindow : Window
         {
             _isRunning = false;
             RunButton.IsEnabled = true;
-            ResumeButton.IsEnabled = ScriptsGrid.SelectedItem is ScriptRunItem;
+            UpdateResumeButton();
             if (_refreshPending) { _refreshPending = false; RefreshFolders(); }
         }
     }

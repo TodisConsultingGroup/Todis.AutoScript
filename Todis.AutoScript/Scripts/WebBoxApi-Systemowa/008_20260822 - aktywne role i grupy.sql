@@ -1,4 +1,5 @@
 /*
+Wersja docelowa: 8
 2026-08-22 - aktywne role i grupy
 Założenia:
     - migracja podnosi wersję bazy systemowej z 7 do 8;
@@ -16,24 +17,7 @@ Skrypt jest przeznaczony wyłącznie dla bazy systemowej.
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-DECLARE @RequiredDBVersion int = 7;
 DECLARE @TargetDBVersion int = 8;
-DECLARE @CurrentDBVersion int;
-
-SELECT TOP (1) @CurrentDBVersion = VersionID
-FROM dbo.tSysDBVersion;
-
--- Kolejne uruchomienie nie wykonuje ponownie zmian.
-IF @CurrentDBVersion = @TargetDBVersion
-BEGIN
-    PRINT N'Obsługa aktywnych ról i grup jest już zainstalowana. Wersja bazy: 8.';
-    RETURN;
-END;
-
-IF @CurrentDBVersion <> @RequiredDBVersion
-BEGIN
-    THROW 50001, N'Nieprawidłowa wersja bazy. Skrypt wymaga wersji 7.', 1;
-END;
 
 IF OBJECT_ID(N'dbo.tSysGroups', N'U') IS NULL OR OBJECT_ID(N'dbo.tSysRoles', N'U') IS NULL
 BEGIN
@@ -55,8 +39,6 @@ BEGIN
 END;
 
 BEGIN TRY
-    BEGIN TRANSACTION;
-
     IF COL_LENGTH(N'dbo.tSysGroups', N'IsActive') IS NULL
     BEGIN
         ALTER TABLE dbo.tSysGroups
@@ -79,12 +61,8 @@ BEGIN TRY
         THROW 50004, N'Nie udało się jednoznacznie zaktualizować wersji bazy.', 1;
     END;
 
-    COMMIT TRANSACTION;
     PRINT N'Dodano obsługę aktywnych ról i grup. Wersja bazy: 8.';
 END TRY
 BEGIN CATCH
-    IF XACT_STATE() <> 0
-        ROLLBACK TRANSACTION;
-
     THROW;
 END CATCH;

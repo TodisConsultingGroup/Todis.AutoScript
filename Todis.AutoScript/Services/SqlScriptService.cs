@@ -21,47 +21,133 @@ public sealed partial class SqlScriptService
     public async Task ExecuteAsync(
         string connectionString,
         IReadOnlyList<ScriptRunItem> scripts,
+        bool useSingleTransaction,
         IProgress<(int Completed, string Message)> progress,
         CancellationToken token)
     {
         await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync(token);
+        SqlTransaction? sharedTransaction = useSingleTransaction
+            ? (SqlTransaction)await connection.BeginTransactionAsync(token)
+            : null;
+        ScriptRunItem? currentItem = null;
 
-        for (var index = 0; index < scripts.Count; index++)
+        try
         {
-            token.ThrowIfCancellationRequested();
-            var item = scripts[index];
-            item.Status = "Uruchamianie";
-            progress.Report((index, $"Uruchamianie: {item.FileName}"));
+            for (var index = 0; index < scripts.Count; index++)
+            {
+                token.ThrowIfCancellationRequested();
+                currentItem = scripts[index];
+                currentItem.Status = "Uruchamianie";
+                progress.Report((index, $"Uruchamianie: {currentItem.FileName}"));
+                var ownsTransaction = sharedTransaction is null;
+                var transaction = sharedTransaction ??
+                    (SqlTransaction)await connection.BeginTransactionAsync(token);
 
-            var sql = await File.ReadAllTextAsync(item.FullPath, token);
-            var batches = SplitBatches(sql);
-            await using var transaction = (SqlTransaction)await connection.BeginTransactionAsync(token);
-            try
-            {
-                foreach (var batch in batches)
+                try
                 {
-                    await using var command = new SqlCommand(batch.Sql, connection, transaction) { CommandTimeout = 0 };
-                    try { await command.ExecuteNonQueryAsync(token); }
-                    catch (SqlException ex)
+                    await ExecuteScriptAsync(connection, transaction, currentItem, token);
+                    if (ownsTransaction)
                     {
-                        var line = batch.StartLine + Math.Max(0, ex.LineNumber - 1);
-                        throw new ScriptExecutionException(item.FileName, line, ex.Message, ex);
+                        await transaction.CommitAsync(token);
+                        currentItem.Details = "Wykonano i zatwierdzono";
                     }
+                    else currentItem.Details = "Wykonano w oczekującej transakcji";
+
+                    currentItem.Status = "Gotowe";
+                    progress.Report((index + 1, $"Wykonano: {currentItem.FileName}"));
                 }
-                await transaction.CommitAsync(token);
-                item.Status = "Gotowe";
-                item.Details = "Wykonano poprawnie";
-                progress.Report((index + 1, $"Wykonano: {item.FileName}"));
+                catch
+                {
+                    if (ownsTransaction)
+                    {
+                        try { await transaction.RollbackAsync(CancellationToken.None); }
+                        catch { /* Zachowujemy pierwotny błąd. */ }
+                    }
+                    currentItem.Status = "Błąd";
+                    throw;
+                }
+                finally
+                {
+                    if (ownsTransaction) await transaction.DisposeAsync();
+                }
             }
-            catch
+
+            if (sharedTransaction is not null)
             {
-                try { await transaction.RollbackAsync(CancellationToken.None); }
-                catch { /* Pierwotny błąd wykonania jest ważniejszy niż błąd rollbacku. */ }
-                item.Status = "Błąd";
-                throw;
+                await sharedTransaction.CommitAsync(token);
+                foreach (var item in scripts) item.Details = "Wykonano i zatwierdzono";
             }
         }
+        catch
+        {
+            if (sharedTransaction is not null)
+            {
+                try { await sharedTransaction.RollbackAsync(CancellationToken.None); }
+                catch { /* Pierwotny błąd wykonania jest ważniejszy niż błąd rollbacku. */ }
+                foreach (var item in scripts.Where(item => item.Status == "Gotowe"))
+                {
+                    item.Status = "Wycofany";
+                    item.Details = "Wycofano całą transakcję";
+                }
+            }
+            if (currentItem is not null) currentItem.Status = "Błąd";
+            throw;
+        }
+        finally
+        {
+            if (sharedTransaction is not null) await sharedTransaction.DisposeAsync();
+        }
+    }
+
+    private static async Task ExecuteScriptAsync(
+        SqlConnection connection,
+        SqlTransaction transaction,
+        ScriptRunItem item,
+        CancellationToken token)
+    {
+        var targetVersion = GetTargetVersion(item.FileName);
+        var currentVersion = await ReadDatabaseVersionAsync(connection, transaction, token);
+        if (currentVersion != targetVersion - 1)
+            throw new ScriptExecutionException(item.FileName, 1,
+                $"Nieprawidłowa wersja bazy. Oczekiwano {targetVersion - 1}, aktualna wersja: {currentVersion}.");
+
+        var sql = await File.ReadAllTextAsync(item.FullPath, token);
+        foreach (var batch in SplitBatches(sql))
+        {
+            await using var command = new SqlCommand(batch.Sql, connection, transaction) { CommandTimeout = 0 };
+            try { await command.ExecuteNonQueryAsync(token); }
+            catch (SqlException ex)
+            {
+                var line = batch.StartLine + Math.Max(0, ex.LineNumber - 1);
+                throw new ScriptExecutionException(item.FileName, line, ex.Message, ex);
+            }
+        }
+
+        var versionAfterScript = await ReadDatabaseVersionAsync(connection, transaction, token);
+        if (versionAfterScript != targetVersion)
+            throw new ScriptExecutionException(item.FileName, 1,
+                $"Skrypt nie ustawił wersji docelowej {targetVersion}. Aktualna wersja: {versionAfterScript}.");
+    }
+
+    private static int GetTargetVersion(string fileName)
+    {
+        var match = TargetVersionRegex().Match(fileName);
+        if (!match.Success || !int.TryParse(match.Groups[1].Value, out var version) || version < 1)
+            throw new ScriptExecutionException(fileName, 1,
+                "Nazwa pliku musi zaczynać się od docelowej wersji, np. 006_opis.sql.");
+        return version;
+    }
+
+    private static async Task<int> ReadDatabaseVersionAsync(
+        SqlConnection connection, SqlTransaction transaction, CancellationToken token)
+    {
+        const string sql = "SELECT CASE WHEN COUNT(*) = 1 THEN MAX(VersionID) ELSE NULL END FROM dbo.tSysDBVersion;";
+        await using var command = new SqlCommand(sql, connection, transaction);
+        var value = await command.ExecuteScalarAsync(token);
+        if (value is null or DBNull)
+            throw new InvalidOperationException("Tabela dbo.tSysDBVersion musi zawierać dokładnie jeden rekord.");
+        return Convert.ToInt32(value);
     }
 
     internal static IReadOnlyList<SqlBatch> SplitBatches(string sql)
@@ -91,11 +177,14 @@ public sealed partial class SqlScriptService
 
     [GeneratedRegex(@"^\s*GO(?:\s+(\d+))?\s*(?:--.*)?$", RegexOptions.IgnoreCase)]
     private static partial Regex GoLineRegex();
+
+    [GeneratedRegex(@"^(\d+)[_-]")]
+    private static partial Regex TargetVersionRegex();
 }
 
 public sealed record SqlBatch(string Sql, int StartLine);
 
-public sealed class ScriptExecutionException(string script, int line, string message, Exception inner)
+public sealed class ScriptExecutionException(string script, int line, string message, Exception? inner = null)
     : Exception($"{script}, linia {line}: {message}", inner)
 {
     public string Script { get; } = script;
