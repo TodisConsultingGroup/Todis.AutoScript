@@ -98,7 +98,7 @@ Publikacja domyślna:
 .\Publish.ps1
 ```
 
-Paczka zostanie nazwana zgodnie z wersją projektu, np. `Todis.AutoScript-v1.0.0-win-x64`.
+Paczka zostanie zapisana jako ZIP nazwany zgodnie z wersją projektu, np. `Todis.AutoScript-v1.0.0-win-x64.zip`.
 
 Publikacja do wybranego katalogu:
 
@@ -116,7 +116,7 @@ Numer wersji zmienia się w `Todis.AutoScript/Todis.AutoScript.csproj`:
 
 Stosuj wersjonowanie `MAJOR.MINOR.PATCH`, np. `1.0.0`, `1.1.0`, `1.1.1`. Każda wersja otrzyma osobny katalog i nie nadpisze poprzedniego wydania.
 
-Przekaż użytkownikowi cały wygenerowany katalog, nie tylko EXE. Paczka zawiera program i folder `Scripts`. Jest samodzielna dla 64-bitowego Windows — nie wymaga instalowania .NET.
+Przekaż użytkownikowi wygenerowany plik ZIP. Po rozpakowaniu zawiera program i folder `Scripts`. Aplikacja jest samodzielna dla 64-bitowego Windows — nie wymaga instalowania .NET.
 
 Konfiguracja połączenia, zaszyfrowane hasło, motyw i szerokości kolumn są przechowywane w lokalnym profilu użytkownika. Aktualizacja programu ich nie usuwa.
 

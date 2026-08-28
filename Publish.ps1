@@ -17,13 +17,19 @@ if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 
 $packageName = "Todis.AutoScript-v$version-win-x64"
-$OutputPath = Join-Path $OutputRoot $packageName
+$stagingPath = Join-Path $OutputRoot ".$packageName-staging"
+$zipPath = Join-Path $OutputRoot "$packageName.zip"
+
+New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
+if (Test-Path -LiteralPath $stagingPath) {
+    Remove-Item -LiteralPath $stagingPath -Recurse -Force
+}
 
 dotnet publish $projectPath `
     --configuration Release `
     --runtime win-x64 `
     --self-contained true `
-    --output $OutputPath `
+    --output $stagingPath `
     -p:PublishSingleFile=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:DebugType=None `
@@ -33,7 +39,14 @@ if ($LASTEXITCODE -ne 0) {
     throw "Publikacja nie powiodła się (kod: $LASTEXITCODE)."
 }
 
+if (Test-Path -LiteralPath $zipPath) {
+    Remove-Item -LiteralPath $zipPath -Force
+}
+
+Compress-Archive -Path (Join-Path $stagingPath '*') -DestinationPath $zipPath -CompressionLevel Optimal
+Remove-Item -LiteralPath $stagingPath -Recurse -Force
+
 Write-Host ""
-Write-Host "Gotowa aplikacja: $OutputPath" -ForegroundColor Green
+Write-Host "Gotowa paczka: $zipPath" -ForegroundColor Green
 Write-Host "Wersja: $version" -ForegroundColor Green
-Write-Host "Przekaż użytkownikowi cały ten katalog, nie tylko plik EXE."
+Write-Host "Przekaż użytkownikowi plik ZIP."
