@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Win32;
 using System.Windows.Threading;
 using Todis.AutoScript.Models;
+using Todis.AutoScript.Resources;
 using Todis.AutoScript.Services;
 
 namespace Todis.AutoScript;
@@ -134,7 +135,7 @@ public partial class MainWindow : Window
         SetBrush("LogBackgroundBrush", dark ? "#020617" : "#111827");
         SetBrush("LogTextBrush", dark ? "#E2E8F0" : "#E5E7EB");
         ThemeToggleButton.Content = dark ? "\uE706" : "\uE708";
-        ThemeToggleButton.ToolTip = dark ? "Włącz jasny motyw" : "Włącz ciemny motyw";
+        ThemeToggleButton.ToolTip = dark ? Strings.EnableLightTheme : Strings.EnableDarkTheme;
     }
 
     private static void SetBrush(string key, string color) =>
@@ -145,9 +146,9 @@ public partial class MainWindow : Window
     {
         _config = ReadForm();
         if (string.IsNullOrWhiteSpace(_config.Server) || string.IsNullOrWhiteSpace(_config.Database))
-            throw new InvalidOperationException("Podaj serwer i nazwę bazy danych.");
+            throw new InvalidOperationException(Strings.EnterServerAndDatabase);
         if (!_config.UseWindowsAuthentication && (string.IsNullOrWhiteSpace(_config.UserName) || string.IsNullOrEmpty(PasswordInput.Password)))
-            throw new InvalidOperationException("Dla uwierzytelniania SQL podaj login i hasło.");
+            throw new InvalidOperationException(Strings.EnterSqlCredentials);
         var builder = new SqlConnectionStringBuilder
         {
             DataSource = _config.Server, InitialCatalog = _config.Database,
@@ -163,7 +164,7 @@ public partial class MainWindow : Window
     {
         _config = ReadForm();
         await _configService.SaveAsync(_config);
-        AppendLog("Ustawienia zapisane lokalnie.");
+        AppendLog(Strings.SettingsSaved);
     }
 
     private async void TestConnectionClick(object sender, RoutedEventArgs e)
@@ -171,12 +172,12 @@ public partial class MainWindow : Window
         try
         {
             IsEnabled = false;
-            AppendLog("Testowanie połączenia…");
+            AppendLog(Strings.TestingConnection);
             await _sqlService.TestConnectionAsync(BuildConnectionString(), CancellationToken.None);
-            AppendLog("Połączenie działa poprawnie.");
-            MessageBox.Show("Połączenie z bazą działa poprawnie.", "Sukces", MessageBoxButton.OK, MessageBoxImage.Information);
+            AppendLog(Strings.ConnectionWorks);
+            MessageBox.Show(Strings.ConnectionWorksMessage, Strings.Success, MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex) { ShowError("Nie udało się połączyć", ex); }
+        catch (Exception ex) { ShowError(Strings.ConnectionFailed, ex); }
         finally { IsEnabled = true; }
     }
 
@@ -185,7 +186,7 @@ public partial class MainWindow : Window
 
     private void ChooseRootClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFolderDialog { Title = "Wybierz folder zawierający zestawy skryptów", InitialDirectory = ScriptsRootTextBox.Text };
+        var dialog = new OpenFolderDialog { Title = Strings.ChooseScriptsFolder, InitialDirectory = ScriptsRootTextBox.Text };
         if (dialog.ShowDialog() == true) { ScriptsRootTextBox.Text = dialog.FolderName; RefreshFolders(); }
     }
 
@@ -201,7 +202,7 @@ public partial class MainWindow : Window
                 ScriptFolderComboBox.Items.Add(Path.GetFileName(folder));
         ScriptFolderComboBox.SelectedItem = previous;
         if (ScriptFolderComboBox.SelectedIndex < 0 && ScriptFolderComboBox.Items.Count > 0) ScriptFolderComboBox.SelectedIndex = 0;
-        if (ScriptFolderComboBox.Items.Count == 0) { _scripts.Clear(); SummaryText.Text = "Brak podfolderów ze skryptami."; }
+        if (ScriptFolderComboBox.Items.Count == 0) { _scripts.Clear(); SummaryText.Text = Strings.NoScriptFolders; }
         else if (ScriptFolderComboBox.SelectedItem is string selectedFolder) LoadScripts(selectedFolder);
     }
 
@@ -248,7 +249,7 @@ public partial class MainWindow : Window
         _scripts.Clear();
         var files = SqlScriptService.GetScriptFiles(Path.Combine(ScriptsRootTextBox.Text, folder));
         foreach (var file in files) _scripts.Add(new ScriptRunItem { FileName = Path.GetFileName(file), FullPath = file });
-        SummaryText.Text = $"{folder} — {_scripts.Count} skryptów (kolejność alfabetyczna)";
+        SummaryText.Text = Strings.SetSummary(folder, _scripts.Count);
         RunProgress.Maximum = Math.Max(1, _scripts.Count); RunProgress.Value = 0;
     }
 
@@ -280,14 +281,16 @@ public partial class MainWindow : Window
 
     private async Task RunScriptsAsync(int startIndex)
     {
-        if (_scripts.Count == 0) { MessageBox.Show("Wybrany folder nie zawiera plików .sql.", "Brak skryptów", MessageBoxButton.OK, MessageBoxImage.Warning); return; }
+        if (_scripts.Count == 0) { MessageBox.Show(Strings.NoSqlFiles, Strings.NoScriptsTitle, MessageBoxButton.OK, MessageBoxImage.Warning); return; }
         var singleTransaction = SingleTransactionCheckBox.IsChecked == true;
         if (singleTransaction) startIndex = 0;
         var scriptsToRun = _scripts.Skip(startIndex).ToList();
         var transactionInfo = singleTransaction
-            ? "Wszystkie skrypty zostaną wykonane w jednej transakcji. Błąd wycofa cały zestaw."
-            : "Każdy skrypt zostanie zatwierdzony osobno. Błąd nie wycofa wcześniejszych skryptów.";
-        var answer = MessageBox.Show($"Uruchomić {scriptsToRun.Count} skryptów na bazie „{DatabaseTextBox.Text}”, zaczynając od „{scriptsToRun[0].FileName}”?\n\n{transactionInfo}", "Potwierdź uruchomienie", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            ? Strings.SingleTransactionInfo
+            : Strings.SeparateTransactionsInfo;
+        var answer = MessageBox.Show(
+            Strings.RunConfirmation(scriptsToRun.Count, DatabaseTextBox.Text, scriptsToRun[0].FileName, transactionInfo),
+            Strings.ConfirmExecution, MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (answer != MessageBoxResult.Yes) return;
         try
         {
@@ -295,28 +298,28 @@ public partial class MainWindow : Window
             ResumeButton.IsEnabled = false;
             _isRunning = true;
             StartRunLog();
-            AppendLog($"START | Serwer: {ServerTextBox.Text.Trim()} | Baza: {DatabaseTextBox.Text.Trim()} | Zestaw: {ScriptFolderComboBox.SelectedItem} | Od: {scriptsToRun[0].FileName}");
+            AppendLog(Strings.RunLogStart(ServerTextBox.Text.Trim(), DatabaseTextBox.Text.Trim(), ScriptFolderComboBox.SelectedItem, scriptsToRun[0].FileName));
             for (var i = 0; i < _scripts.Count; i++)
             {
-                _scripts[i].Status = i < startIndex ? "Pominięty" : "Oczekuje";
-                _scripts[i].Details = i < startIndex ? "Pominięty przy ręcznym wznowieniu" : string.Empty;
+                _scripts[i].Status = i < startIndex ? Strings.Skipped : Strings.Pending;
+                _scripts[i].Details = i < startIndex ? Strings.SkippedOnResume : string.Empty;
             }
             await _configService.SaveAsync(ReadForm());
             RunProgress.Maximum = scriptsToRun.Count;
             RunProgress.Value = 0;
             var progress = new Progress<(int Completed, string Message)>(p => { RunProgress.Value = p.Completed; AppendLog(p.Message); });
             await _sqlService.ExecuteAsync(BuildConnectionString(), scriptsToRun, singleTransaction, progress, CancellationToken.None);
-            AppendLog("Wszystkie skrypty wykonano poprawnie.");
-            AppendLog($"Log zapisano w: {_currentLogPath}");
-            MessageBox.Show("Wszystkie skrypty wykonano poprawnie.", "Gotowe", MessageBoxButton.OK, MessageBoxImage.Information);
+            AppendLog(Strings.AllScriptsSucceeded);
+            AppendLog(Strings.LogSaved(_currentLogPath));
+            MessageBox.Show(Strings.AllScriptsSucceeded, Strings.Done, MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (ScriptExecutionException ex)
         {
             var item = _scripts.FirstOrDefault(x => x.FileName == ex.Script);
-            if (item is not null) item.Details = $"Linia {ex.Line}: {ex.InnerException?.Message ?? ex.Message}";
-            ShowError("Wykonywanie zatrzymane", ex);
+            if (item is not null) item.Details = Strings.LineError(ex.Line, ex.InnerException?.Message ?? ex.Message);
+            ShowError(Strings.ExecutionStopped, ex);
         }
-        catch (Exception ex) { ShowError("Wykonywanie zatrzymane", ex); }
+        catch (Exception ex) { ShowError(Strings.ExecutionStopped, ex); }
         finally
         {
             _isRunning = false;
@@ -361,7 +364,7 @@ public partial class MainWindow : Window
 
     private void ShowError(string title, Exception ex)
     {
-        AppendLog($"BŁĄD: {ex.Message}");
+        AppendLog(Strings.ErrorLog(ex.Message));
         MessageBox.Show(ex.Message, title, MessageBoxButton.OK, MessageBoxImage.Error);
     }
 }

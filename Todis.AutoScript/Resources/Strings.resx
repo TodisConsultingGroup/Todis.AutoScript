@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+  <data name="WindowTitle" xml:space="preserve"><value>Todis AutoScript</value></data>
+  <data name="Connection" xml:space="preserve"><value>Połączenie</value></data>
+  <data name="EnableDarkTheme" xml:space="preserve"><value>Włącz ciemny motyw</value></data>
+  <data name="EnableLightTheme" xml:space="preserve"><value>Włącz jasny motyw</value></data>
+  <data name="SettingsStoredLocally" xml:space="preserve"><value>Ustawienia zapisują się lokalnie na tym komputerze.</value></data>
+  <data name="ServerInstance" xml:space="preserve"><value>Serwer / instancja</value></data>
+  <data name="ServerExample" xml:space="preserve"><value>np. localhost\SQLEXPRESS</value></data>
+  <data name="DatabaseName" xml:space="preserve"><value>Nazwa bazy</value></data>
+  <data name="Authentication" xml:space="preserve"><value>Uwierzytelnianie</value></data>
+  <data name="WindowsAuthentication" xml:space="preserve"><value>Windows</value></data>
+  <data name="SqlServerAuthentication" xml:space="preserve"><value>SQL Server</value></data>
+  <data name="Login" xml:space="preserve"><value>Login</value></data>
+  <data name="Password" xml:space="preserve"><value>Hasło</value></data>
+  <data name="TrustServerCertificate" xml:space="preserve"><value>Ufaj certyfikatowi serwera</value></data>
+  <data name="SaveSettings" xml:space="preserve"><value>Zapisz ustawienia</value></data>
+  <data name="TestConnection" xml:space="preserve"><value>Testuj połączenie</value></data>
+  <data name="ScriptsSource" xml:space="preserve"><value>Źródło skryptów</value></data>
+  <data name="RootFolder" xml:space="preserve"><value>Folder główny</value></data>
+  <data name="ChangeRootFolder" xml:space="preserve"><value>Zmień folder główny…</value></data>
+  <data name="ScriptSet" xml:space="preserve"><value>Zestaw skryptów / typ bazy</value></data>
+  <data name="RefreshFolders" xml:space="preserve"><value>Odśwież foldery</value></data>
+  <data name="SingleTransaction" xml:space="preserve"><value>Uruchom cały zestaw w jednej transakcji</value></data>
+  <data name="SingleTransactionTip" xml:space="preserve"><value>Po błędzie wycofuje zmiany wszystkich skryptów z bieżącego uruchomienia</value></data>
+  <data name="ScriptsQueue" xml:space="preserve"><value>Kolejka skryptów</value></data>
+  <data name="SelectScriptSet" xml:space="preserve"><value>Wybierz zestaw skryptów.</value></data>
+  <data name="RunAll" xml:space="preserve"><value>▶  Uruchom wszystkie</value></data>
+  <data name="ResumeSelected" xml:space="preserve"><value>↪  Wznów od zaznaczonego</value></data>
+  <data name="ResumeSelectedTip" xml:space="preserve"><value>Dostępne tylko w trybie osobnych transakcji</value></data>
+  <data name="File" xml:space="preserve"><value>Plik</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Details" xml:space="preserve"><value>Szczegóły</value></data>
+  <data name="Log" xml:space="preserve"><value>Log</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Ustawienia zapisane lokalnie.</value></data>
+  <data name="TestingConnection" xml:space="preserve"><value>Testowanie połączenia…</value></data>
+  <data name="ConnectionWorks" xml:space="preserve"><value>Połączenie działa poprawnie.</value></data>
+  <data name="ConnectionWorksMessage" xml:space="preserve"><value>Połączenie z bazą działa poprawnie.</value></data>
+  <data name="Success" xml:space="preserve"><value>Sukces</value></data>
+  <data name="ConnectionFailed" xml:space="preserve"><value>Nie udało się połączyć</value></data>
+  <data name="EnterServerAndDatabase" xml:space="preserve"><value>Podaj serwer i nazwę bazy danych.</value></data>
+  <data name="EnterSqlCredentials" xml:space="preserve"><value>Dla uwierzytelniania SQL podaj login i hasło.</value></data>
+  <data name="ChooseScriptsFolder" xml:space="preserve"><value>Wybierz folder zawierający zestawy skryptów</value></data>
+  <data name="NoScriptFolders" xml:space="preserve"><value>Brak podfolderów ze skryptami.</value></data>
+  <data name="SetSummaryFormat" xml:space="preserve"><value>{0} — {1} skryptów (kolejność alfabetyczna)</value></data>
+  <data name="NoSqlFiles" xml:space="preserve"><value>Wybrany folder nie zawiera plików .sql.</value></data>
+  <data name="NoScriptsTitle" xml:space="preserve"><value>Brak skryptów</value></data>
+  <data name="SingleTransactionInfo" xml:space="preserve"><value>Wszystkie skrypty zostaną wykonane w jednej transakcji. Błąd wycofa cały zestaw.</value></data>
+  <data name="SeparateTransactionsInfo" xml:space="preserve"><value>Każdy skrypt zostanie zatwierdzony osobno. Błąd nie wycofa wcześniejszych skryptów.</value></data>
+  <data name="RunConfirmationFormat" xml:space="preserve"><value>Uruchomić {0} skryptów na bazie „{1}”, zaczynając od „{2}”?&#xA;&#xA;{3}</value></data>
+  <data name="ConfirmExecution" xml:space="preserve"><value>Potwierdź uruchomienie</value></data>
+  <data name="RunLogStartFormat" xml:space="preserve"><value>START | Serwer: {0} | Baza: {1} | Zestaw: {2} | Od: {3}</value></data>
+  <data name="Skipped" xml:space="preserve"><value>Pominięty</value></data>
+  <data name="Pending" xml:space="preserve"><value>Oczekuje</value></data>
+  <data name="SkippedOnResume" xml:space="preserve"><value>Pominięty przy ręcznym wznowieniu</value></data>
+  <data name="AllScriptsSucceeded" xml:space="preserve"><value>Wszystkie skrypty wykonano poprawnie.</value></data>
+  <data name="LogSavedFormat" xml:space="preserve"><value>Log zapisano w: {0}</value></data>
+  <data name="Done" xml:space="preserve"><value>Gotowe</value></data>
+  <data name="ExecutionStopped" xml:space="preserve"><value>Wykonywanie zatrzymane</value></data>
+  <data name="LineErrorFormat" xml:space="preserve"><value>Linia {0}: {1}</value></data>
+  <data name="ErrorLogFormat" xml:space="preserve"><value>BŁĄD: {0}</value></data>
+  <data name="Running" xml:space="preserve"><value>Uruchamianie</value></data>
+  <data name="RunningScriptFormat" xml:space="preserve"><value>Uruchamianie: {0}</value></data>
+  <data name="ExecutedScriptFormat" xml:space="preserve"><value>Wykonano: {0}</value></data>
+  <data name="ExecutedCommitted" xml:space="preserve"><value>Wykonano i zatwierdzono</value></data>
+  <data name="ExecutedPendingTransaction" xml:space="preserve"><value>Wykonano w oczekującej transakcji</value></data>
+  <data name="Error" xml:space="preserve"><value>Błąd</value></data>
+  <data name="RolledBack" xml:space="preserve"><value>Wycofany</value></data>
+  <data name="WholeTransactionRolledBack" xml:space="preserve"><value>Wycofano całą transakcję</value></data>
+  <data name="InvalidDatabaseVersionFormat" xml:space="preserve"><value>Nieprawidłowa wersja bazy. Oczekiwano {0}, aktualna wersja: {1}.</value></data>
+  <data name="TargetVersionNotSetFormat" xml:space="preserve"><value>Skrypt nie ustawił wersji docelowej {0}. Aktualna wersja: {1}.</value></data>
+  <data name="InvalidFileName" xml:space="preserve"><value>Nazwa pliku musi zaczynać się od docelowej wersji, np. 006_opis.sql.</value></data>
+  <data name="InvalidVersionTable" xml:space="preserve"><value>Tabela dbo.tSysDBVersion musi zawierać dokładnie jeden rekord.</value></data>
+  <data name="ScriptExceptionFormat" xml:space="preserve"><value>{0}, linia {1}: {2}</value></data>
+</root>

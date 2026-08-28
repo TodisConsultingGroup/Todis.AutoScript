@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
 using Todis.AutoScript.Models;
+using Todis.AutoScript.Resources;
 
 namespace Todis.AutoScript.Services;
 
@@ -38,8 +39,8 @@ public sealed partial class SqlScriptService
             {
                 token.ThrowIfCancellationRequested();
                 currentItem = scripts[index];
-                currentItem.Status = "Uruchamianie";
-                progress.Report((index, $"Uruchamianie: {currentItem.FileName}"));
+                currentItem.Status = Strings.Running;
+                progress.Report((index, Strings.RunningScript(currentItem.FileName)));
                 var ownsTransaction = sharedTransaction is null;
                 var transaction = sharedTransaction ??
                     (SqlTransaction)await connection.BeginTransactionAsync(token);
@@ -50,12 +51,12 @@ public sealed partial class SqlScriptService
                     if (ownsTransaction)
                     {
                         await transaction.CommitAsync(token);
-                        currentItem.Details = "Wykonano i zatwierdzono";
+                        currentItem.Details = Strings.ExecutedCommitted;
                     }
-                    else currentItem.Details = "Wykonano w oczekującej transakcji";
+                    else currentItem.Details = Strings.ExecutedPendingTransaction;
 
-                    currentItem.Status = "Gotowe";
-                    progress.Report((index + 1, $"Wykonano: {currentItem.FileName}"));
+                    currentItem.Status = Strings.Done;
+                    progress.Report((index + 1, Strings.ExecutedScript(currentItem.FileName)));
                 }
                 catch
                 {
@@ -64,7 +65,7 @@ public sealed partial class SqlScriptService
                         try { await transaction.RollbackAsync(CancellationToken.None); }
                         catch { /* Zachowujemy pierwotny błąd. */ }
                     }
-                    currentItem.Status = "Błąd";
+                    currentItem.Status = Strings.Error;
                     throw;
                 }
                 finally
@@ -76,7 +77,7 @@ public sealed partial class SqlScriptService
             if (sharedTransaction is not null)
             {
                 await sharedTransaction.CommitAsync(token);
-                foreach (var item in scripts) item.Details = "Wykonano i zatwierdzono";
+                foreach (var item in scripts) item.Details = Strings.ExecutedCommitted;
             }
         }
         catch
@@ -85,13 +86,13 @@ public sealed partial class SqlScriptService
             {
                 try { await sharedTransaction.RollbackAsync(CancellationToken.None); }
                 catch { /* Pierwotny błąd wykonania jest ważniejszy niż błąd rollbacku. */ }
-                foreach (var item in scripts.Where(item => item.Status == "Gotowe"))
+                foreach (var item in scripts.Where(item => item.Status == Strings.Done))
                 {
-                    item.Status = "Wycofany";
-                    item.Details = "Wycofano całą transakcję";
+                    item.Status = Strings.RolledBack;
+                    item.Details = Strings.WholeTransactionRolledBack;
                 }
             }
-            if (currentItem is not null) currentItem.Status = "Błąd";
+            if (currentItem is not null) currentItem.Status = Strings.Error;
             throw;
         }
         finally
@@ -110,7 +111,7 @@ public sealed partial class SqlScriptService
         var currentVersion = await ReadDatabaseVersionAsync(connection, transaction, token);
         if (currentVersion != targetVersion - 1)
             throw new ScriptExecutionException(item.FileName, 1,
-                $"Nieprawidłowa wersja bazy. Oczekiwano {targetVersion - 1}, aktualna wersja: {currentVersion}.");
+                Strings.InvalidDatabaseVersion(targetVersion - 1, currentVersion));
 
         var sql = await File.ReadAllTextAsync(item.FullPath, token);
         foreach (var batch in SplitBatches(sql))
@@ -127,7 +128,7 @@ public sealed partial class SqlScriptService
         var versionAfterScript = await ReadDatabaseVersionAsync(connection, transaction, token);
         if (versionAfterScript != targetVersion)
             throw new ScriptExecutionException(item.FileName, 1,
-                $"Skrypt nie ustawił wersji docelowej {targetVersion}. Aktualna wersja: {versionAfterScript}.");
+                Strings.TargetVersionNotSet(targetVersion, versionAfterScript));
     }
 
     private static int GetTargetVersion(string fileName)
@@ -135,7 +136,7 @@ public sealed partial class SqlScriptService
         var match = TargetVersionRegex().Match(fileName);
         if (!match.Success || !int.TryParse(match.Groups[1].Value, out var version) || version < 1)
             throw new ScriptExecutionException(fileName, 1,
-                "Nazwa pliku musi zaczynać się od docelowej wersji, np. 006_opis.sql.");
+                Strings.InvalidFileName);
         return version;
     }
 
@@ -146,7 +147,7 @@ public sealed partial class SqlScriptService
         await using var command = new SqlCommand(sql, connection, transaction);
         var value = await command.ExecuteScalarAsync(token);
         if (value is null or DBNull)
-            throw new InvalidOperationException("Tabela dbo.tSysDBVersion musi zawierać dokładnie jeden rekord.");
+            throw new InvalidOperationException(Strings.InvalidVersionTable);
         return Convert.ToInt32(value);
     }
 
@@ -185,7 +186,7 @@ public sealed partial class SqlScriptService
 public sealed record SqlBatch(string Sql, int StartLine);
 
 public sealed class ScriptExecutionException(string script, int line, string message, Exception? inner = null)
-    : Exception($"{script}, linia {line}: {message}", inner)
+    : Exception(Strings.ScriptException(script, line, message), inner)
 {
     public string Script { get; } = script;
     public int Line { get; } = line;

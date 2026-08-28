@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:Todis.AutoScript.Converters"
-        Title="Todis AutoScript" Height="840" Width="1100" MinHeight="720" MinWidth="900"
+        xmlns:text="clr-namespace:Todis.AutoScript.Resources"
+        Title="{x:Static text:Strings.WindowTitle}" Height="840" Width="1100" MinHeight="720" MinWidth="900"
         WindowStartupLocation="CenterScreen" Background="{DynamicResource WindowBackgroundBrush}" Foreground="{DynamicResource TextBrush}">
     <Window.Resources>
         <converters:RowNumberConverter x:Key="RowNumberConverter"/>
@@ -13,34 +14,34 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                 <StackPanel Margin="0,0,14,0">
                     <DockPanel LastChildFill="False">
-                        <TextBlock Text="Połączenie" FontSize="24" FontWeight="SemiBold" DockPanel.Dock="Left" VerticalAlignment="Center"/>
-                        <Button x:Name="ThemeToggleButton" DockPanel.Dock="Right" Width="42" Height="38" Padding="0" Margin="8,0,0,0" FontFamily="Segoe MDL2 Assets" FontSize="18" Click="ToggleThemeClick" Content="&#xE708;" ToolTip="Włącz ciemny motyw"/>
+                        <TextBlock Text="{x:Static text:Strings.Connection}" FontSize="24" FontWeight="SemiBold" DockPanel.Dock="Left" VerticalAlignment="Center"/>
+                        <Button x:Name="ThemeToggleButton" DockPanel.Dock="Right" Width="42" Height="38" Padding="0" Margin="8,0,0,0" FontFamily="Segoe MDL2 Assets" FontSize="18" Click="ToggleThemeClick" Content="&#xE708;" ToolTip="{x:Static text:Strings.EnableDarkTheme}"/>
                     </DockPanel>
-                    <TextBlock Text="Ustawienia zapisują się lokalnie na tym komputerze." Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,18" TextWrapping="Wrap"/>
-                    <TextBlock Text="Serwer / instancja"/><TextBox x:Name="ServerTextBox" ToolTip="np. localhost\SQLEXPRESS"/>
-                    <TextBlock Text="Nazwa bazy"/><TextBox x:Name="DatabaseTextBox"/>
-                    <TextBlock Text="Uwierzytelnianie"/>
+                    <TextBlock Text="{x:Static text:Strings.SettingsStoredLocally}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,18" TextWrapping="Wrap"/>
+                    <TextBlock Text="{x:Static text:Strings.ServerInstance}"/><TextBox x:Name="ServerTextBox" ToolTip="{x:Static text:Strings.ServerExample}"/>
+                    <TextBlock Text="{x:Static text:Strings.DatabaseName}"/><TextBox x:Name="DatabaseTextBox"/>
+                    <TextBlock Text="{x:Static text:Strings.Authentication}"/>
                     <ComboBox x:Name="AuthenticationComboBox" SelectionChanged="AuthenticationChanged">
-                        <ComboBoxItem Content="Windows" Tag="Windows"/>
-                        <ComboBoxItem Content="SQL Server" Tag="Sql"/>
+                        <ComboBoxItem Content="{x:Static text:Strings.WindowsAuthentication}" Tag="Windows"/>
+                        <ComboBoxItem Content="{x:Static text:Strings.SqlServerAuthentication}" Tag="Sql"/>
                     </ComboBox>
                     <StackPanel x:Name="SqlCredentialsPanel">
-                        <TextBlock Text="Login"/><TextBox x:Name="UserNameTextBox"/>
-                        <TextBlock Text="Hasło"/><PasswordBox x:Name="PasswordInput"/>
+                        <TextBlock Text="{x:Static text:Strings.Login}"/><TextBox x:Name="UserNameTextBox"/>
+                        <TextBlock Text="{x:Static text:Strings.Password}"/><PasswordBox x:Name="PasswordInput"/>
                     </StackPanel>
-                    <CheckBox x:Name="TrustCertificateCheckBox" Content="Ufaj certyfikatowi serwera" Margin="0,6,0,14"/>
+                    <CheckBox x:Name="TrustCertificateCheckBox" Content="{x:Static text:Strings.TrustServerCertificate}" Margin="0,6,0,14"/>
                     <WrapPanel>
-                        <Button Content="Zapisz ustawienia" Click="SaveSettingsClick"/>
-                        <Button Content="Testuj połączenie" Click="TestConnectionClick"/>
+                        <Button Content="{x:Static text:Strings.SaveSettings}" Click="SaveSettingsClick"/>
+                        <Button Content="{x:Static text:Strings.TestConnection}" Click="TestConnectionClick"/>
                     </WrapPanel>
                     <Separator Margin="0,18"/>
-                    <TextBlock Text="Źródło skryptów" FontSize="18" FontWeight="SemiBold"/>
-                    <TextBlock Text="Folder główny" Margin="0,12,0,0"/><TextBox x:Name="ScriptsRootTextBox" IsReadOnly="True"/>
-                    <Button Content="Zmień folder główny…" Click="ChooseRootClick" HorizontalAlignment="Left"/>
-                    <TextBlock Text="Zestaw skryptów / typ bazy" Margin="0,12,0,0"/>
+                    <TextBlock Text="{x:Static text:Strings.ScriptsSource}" FontSize="18" FontWeight="SemiBold"/>
+                    <TextBlock Text="{x:Static text:Strings.RootFolder}" Margin="0,12,0,0"/><TextBox x:Name="ScriptsRootTextBox" IsReadOnly="True"/>
+                    <Button Content="{x:Static text:Strings.ChangeRootFolder}" Click="ChooseRootClick" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{x:Static text:Strings.ScriptSet}" Margin="0,12,0,0"/>
                     <ComboBox x:Name="ScriptFolderComboBox" SelectionChanged="ScriptFolderChanged"/>
-                    <Button Content="Odśwież foldery" Click="RefreshFoldersClick" HorizontalAlignment="Left"/>
-                    <CheckBox x:Name="SingleTransactionCheckBox" Content="Uruchom cały zestaw w jednej transakcji" Margin="0,14,0,4" Checked="TransactionModeChanged" Unchecked="TransactionModeChanged" ToolTip="Po błędzie wycofuje zmiany wszystkich skryptów z bieżącego uruchomienia"/>
+                    <Button Content="{x:Static text:Strings.RefreshFolders}" Click="RefreshFoldersClick" HorizontalAlignment="Left"/>
+                    <CheckBox x:Name="SingleTransactionCheckBox" Content="{x:Static text:Strings.SingleTransaction}" Margin="0,14,0,4" Checked="TransactionModeChanged" Unchecked="TransactionModeChanged" ToolTip="{x:Static text:Strings.SingleTransactionTip}"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>
@@ -49,24 +50,24 @@
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
                 <DockPanel>
                     <StackPanel DockPanel.Dock="Left">
-                        <TextBlock Text="Kolejka skryptów" FontSize="24" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="SummaryText" Text="Wybierz zestaw skryptów." Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,15"/>
+                        <TextBlock Text="{x:Static text:Strings.ScriptsQueue}" FontSize="24" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="SummaryText" Text="{x:Static text:Strings.SelectScriptSet}" Foreground="{DynamicResource MutedTextBrush}" Margin="0,4,0,15"/>
                     </StackPanel>
                     <StackPanel DockPanel.Dock="Right" HorizontalAlignment="Right">
-                        <Button x:Name="RunButton" Content="▶  Uruchom wszystkie" Click="RunScriptsClick" Background="#2563EB" Foreground="White" FontWeight="SemiBold"/>
-                        <Button x:Name="ResumeButton" Content="↪  Wznów od zaznaczonego" Click="ResumeScriptsClick" IsEnabled="False" ToolTip="Dostępne tylko w trybie osobnych transakcji"/>
+                        <Button x:Name="RunButton" Content="{x:Static text:Strings.RunAll}" Click="RunScriptsClick" Background="#2563EB" Foreground="White" FontWeight="SemiBold"/>
+                        <Button x:Name="ResumeButton" Content="{x:Static text:Strings.ResumeSelected}" Click="ResumeScriptsClick" IsEnabled="False" ToolTip="{x:Static text:Strings.ResumeSelectedTip}"/>
                     </StackPanel>
                 </DockPanel>
                 <ProgressBar x:Name="RunProgress" Grid.Row="1" Height="8" Minimum="0" Margin="0,0,0,16"/>
                 <DataGrid x:Name="ScriptsGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single" SelectionUnit="FullRow" SelectionChanged="ScriptsGridSelectionChanged" HeadersVisibility="Column" GridLinesVisibility="None" BorderThickness="0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="#" Binding="{Binding RelativeSource={RelativeSource AncestorType=DataGridRow}, Path=AlternationIndex, Converter={StaticResource RowNumberConverter}}" Width="38"/>
-                        <DataGridTextColumn Header="Plik" Binding="{Binding FileName}" Width="*"/>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110"/>
-                        <DataGridTextColumn Header="Szczegóły" Binding="{Binding Details}" Width="2*"/>
+                        <DataGridTextColumn Header="{x:Static text:Strings.File}" Binding="{Binding FileName}" Width="*"/>
+                        <DataGridTextColumn Header="{x:Static text:Strings.Status}" Binding="{Binding Status}" Width="110"/>
+                        <DataGridTextColumn Header="{x:Static text:Strings.Details}" Binding="{Binding Details}" Width="2*"/>
                     </DataGrid.Columns>
                 </DataGrid>
-                <TextBlock Grid.Row="3" Text="Log" FontSize="16" FontWeight="SemiBold" Margin="0,16,0,5"/>
+                <TextBlock Grid.Row="3" Text="{x:Static text:Strings.Log}" FontSize="16" FontWeight="SemiBold" Margin="0,16,0,5"/>
                 <TextBox x:Name="LogTextBox" Grid.Row="4" Height="125" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontFamily="Consolas" Background="{DynamicResource LogBackgroundBrush}" Foreground="{DynamicResource LogTextBrush}"/>
             </Grid>
         </Border>

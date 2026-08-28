@@ -1,0 +1,85 @@
+using System.Globalization;
+using System.Resources;
+
+namespace Todis.AutoScript.Resources;
+
+public static class Strings
+{
+    private static readonly ResourceManager Manager = new("Todis.AutoScript.Resources.Strings", typeof(Strings).Assembly);
+    private static string Value(string key) => Manager.GetString(key, CultureInfo.CurrentUICulture) ?? key;
+    public static string Format(string key, params object?[] args) => string.Format(CultureInfo.CurrentCulture, Value(key), args);
+
+    public static string WindowTitle => Value(nameof(WindowTitle));
+    public static string Connection => Value(nameof(Connection));
+    public static string EnableDarkTheme => Value(nameof(EnableDarkTheme));
+    public static string EnableLightTheme => Value(nameof(EnableLightTheme));
+    public static string SettingsStoredLocally => Value(nameof(SettingsStoredLocally));
+    public static string ServerInstance => Value(nameof(ServerInstance));
+    public static string ServerExample => Value(nameof(ServerExample));
+    public static string DatabaseName => Value(nameof(DatabaseName));
+    public static string Authentication => Value(nameof(Authentication));
+    public static string WindowsAuthentication => Value(nameof(WindowsAuthentication));
+    public static string SqlServerAuthentication => Value(nameof(SqlServerAuthentication));
+    public static string Login => Value(nameof(Login));
+    public static string Password => Value(nameof(Password));
+    public static string TrustServerCertificate => Value(nameof(TrustServerCertificate));
+    public static string SaveSettings => Value(nameof(SaveSettings));
+    public static string TestConnection => Value(nameof(TestConnection));
+    public static string ScriptsSource => Value(nameof(ScriptsSource));
+    public static string RootFolder => Value(nameof(RootFolder));
+    public static string ChangeRootFolder => Value(nameof(ChangeRootFolder));
+    public static string ScriptSet => Value(nameof(ScriptSet));
+    public static string RefreshFolders => Value(nameof(RefreshFolders));
+    public static string SingleTransaction => Value(nameof(SingleTransaction));
+    public static string SingleTransactionTip => Value(nameof(SingleTransactionTip));
+    public static string ScriptsQueue => Value(nameof(ScriptsQueue));
+    public static string SelectScriptSet => Value(nameof(SelectScriptSet));
+    public static string RunAll => Value(nameof(RunAll));
+    public static string ResumeSelected => Value(nameof(ResumeSelected));
+    public static string ResumeSelectedTip => Value(nameof(ResumeSelectedTip));
+    public static string File => Value(nameof(File));
+    public static string Status => Value(nameof(Status));
+    public static string Details => Value(nameof(Details));
+    public static string Log => Value(nameof(Log));
+    public static string SettingsSaved => Value(nameof(SettingsSaved));
+    public static string TestingConnection => Value(nameof(TestingConnection));
+    public static string ConnectionWorks => Value(nameof(ConnectionWorks));
+    public static string ConnectionWorksMessage => Value(nameof(ConnectionWorksMessage));
+    public static string Success => Value(nameof(Success));
+    public static string ConnectionFailed => Value(nameof(ConnectionFailed));
+    public static string EnterServerAndDatabase => Value(nameof(EnterServerAndDatabase));
+    public static string EnterSqlCredentials => Value(nameof(EnterSqlCredentials));
+    public static string ChooseScriptsFolder => Value(nameof(ChooseScriptsFolder));
+    public static string NoScriptFolders => Value(nameof(NoScriptFolders));
+    public static string NoSqlFiles => Value(nameof(NoSqlFiles));
+    public static string NoScriptsTitle => Value(nameof(NoScriptsTitle));
+    public static string SingleTransactionInfo => Value(nameof(SingleTransactionInfo));
+    public static string SeparateTransactionsInfo => Value(nameof(SeparateTransactionsInfo));
+    public static string ConfirmExecution => Value(nameof(ConfirmExecution));
+    public static string Skipped => Value(nameof(Skipped));
+    public static string Pending => Value(nameof(Pending));
+    public static string SkippedOnResume => Value(nameof(SkippedOnResume));
+    public static string AllScriptsSucceeded => Value(nameof(AllScriptsSucceeded));
+    public static string Done => Value(nameof(Done));
+    public static string ExecutionStopped => Value(nameof(ExecutionStopped));
+    public static string Running => Value(nameof(Running));
+    public static string ExecutedCommitted => Value(nameof(ExecutedCommitted));
+    public static string ExecutedPendingTransaction => Value(nameof(ExecutedPendingTransaction));
+    public static string Error => Value(nameof(Error));
+    public static string RolledBack => Value(nameof(RolledBack));
+    public static string WholeTransactionRolledBack => Value(nameof(WholeTransactionRolledBack));
+    public static string InvalidFileName => Value(nameof(InvalidFileName));
+    public static string InvalidVersionTable => Value(nameof(InvalidVersionTable));
+
+    public static string SetSummary(object? folder, object? count) => Format("SetSummaryFormat", folder, count);
+    public static string RunConfirmation(params object?[] args) => Format("RunConfirmationFormat", args);
+    public static string RunLogStart(params object?[] args) => Format("RunLogStartFormat", args);
+    public static string LogSaved(object? path) => Format("LogSavedFormat", path);
+    public static string LineError(object? line, object? message) => Format("LineErrorFormat", line, message);
+    public static string ErrorLog(object? message) => Format("ErrorLogFormat", message);
+    public static string RunningScript(object? file) => Format("RunningScriptFormat", file);
+    public static string ExecutedScript(object? file) => Format("ExecutedScriptFormat", file);
+    public static string InvalidDatabaseVersion(object? expected, object? current) => Format("InvalidDatabaseVersionFormat", expected, current);
+    public static string TargetVersionNotSet(object? target, object? current) => Format("TargetVersionNotSetFormat", target, current);
+    public static string ScriptException(object? script, object? line, object? message) => Format("ScriptExceptionFormat", script, line, message);
+}

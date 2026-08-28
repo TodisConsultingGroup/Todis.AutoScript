@@ -1,11 +1,12 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Todis.AutoScript.Resources;
 
 namespace Todis.AutoScript.Models;
 
 public sealed class ScriptRunItem : INotifyPropertyChanged
 {
-    private string _status = "Oczekuje";
+    private string _status = Strings.Pending;
     private string _details = string.Empty;
 
     public required string FileName { get; init; }

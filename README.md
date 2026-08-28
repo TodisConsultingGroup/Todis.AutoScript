@@ -108,6 +108,10 @@ Przekaż użytkownikowi cały wygenerowany katalog, nie tylko EXE. Paczka zawier
 
 Konfiguracja połączenia, zaszyfrowane hasło, motyw i szerokości kolumn są przechowywane w lokalnym profilu użytkownika. Aktualizacja programu ich nie usuwa.
 
-## 9. Najważniejsza zasada
+## 9. Teksty aplikacji
+
+Wszystkie teksty interfejsu, komunikaty, statusy i formaty logów znajdują się w `Todis.AutoScript/Resources/Strings.resx`. Nowych komunikatów nie należy wpisywać bezpośrednio w kodzie C# ani XAML.
+
+## 10. Najważniejsza zasada
 
 Przed uruchomieniem sprawdź właściwy serwer, bazę, zestaw skryptów i ich kolejność.
