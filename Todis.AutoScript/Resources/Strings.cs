@@ -10,6 +10,7 @@ public static class Strings
     public static string Format(string key, params object?[] args) => string.Format(CultureInfo.CurrentCulture, Value(key), args);
 
     public static string WindowTitle => Value(nameof(WindowTitle));
+    public static string WindowTitleVersion(object? version) => Format("WindowTitleVersionFormat", WindowTitle, version);
     public static string Connection => Value(nameof(Connection));
     public static string EnableDarkTheme => Value(nameof(EnableDarkTheme));
     public static string EnableLightTheme => Value(nameof(EnableLightTheme));

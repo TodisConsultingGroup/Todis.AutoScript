@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Data.SqlClient;
@@ -27,6 +28,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.0.0";
+        Title = Strings.WindowTitleVersion(version);
         _refreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
         _refreshTimer.Tick += (_, _) =>
         {

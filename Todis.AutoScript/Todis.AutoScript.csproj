@@ -8,6 +8,9 @@
     <ApplicationIcon />
     <AssemblyName>Todis.AutoScript</AssemblyName>
     <RootNamespace>Todis.AutoScript</RootNamespace>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />

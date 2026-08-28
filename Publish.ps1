@@ -1,14 +1,23 @@
 param(
-    [string]$OutputPath
+    [string]$OutputRoot
 )
 
 $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = $PSScriptRoot
 $projectPath = Join-Path $repositoryRoot 'Todis.AutoScript\Todis.AutoScript.csproj'
-if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $repositoryRoot 'artifacts\Todis.AutoScript-win-x64'
+$projectXml = [xml](Get-Content -Raw -LiteralPath $projectPath)
+$version = [string]($projectXml.Project.PropertyGroup.Version | Select-Object -First 1)
+if ([string]::IsNullOrWhiteSpace($version)) {
+    throw 'Brak elementu <Version> w pliku projektu.'
 }
+
+if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    $OutputRoot = Join-Path $repositoryRoot 'artifacts'
+}
+
+$packageName = "Todis.AutoScript-v$version-win-x64"
+$OutputPath = Join-Path $OutputRoot $packageName
 
 dotnet publish $projectPath `
     --configuration Release `
@@ -26,4 +35,5 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "Gotowa aplikacja: $OutputPath" -ForegroundColor Green
+Write-Host "Wersja: $version" -ForegroundColor Green
 Write-Host "Przekaż użytkownikowi cały ten katalog, nie tylko plik EXE."

@@ -5,6 +5,7 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
   <data name="WindowTitle" xml:space="preserve"><value>Todis AutoScript</value></data>
+  <data name="WindowTitleVersionFormat" xml:space="preserve"><value>{0} v{1}</value></data>
   <data name="Connection" xml:space="preserve"><value>Połączenie</value></data>
   <data name="EnableDarkTheme" xml:space="preserve"><value>Włącz ciemny motyw</value></data>
   <data name="EnableLightTheme" xml:space="preserve"><value>Włącz jasny motyw</value></data>

@@ -98,11 +98,23 @@ Publikacja domyślna:
 .\Publish.ps1
 ```
 
+Paczka zostanie nazwana zgodnie z wersją projektu, np. `Todis.AutoScript-v1.0.0-win-x64`.
+
 Publikacja do wybranego katalogu:
 
 ```powershell
-.\Publish.ps1 -OutputPath "C:\codex\Todis.AutoScript-win-x64"
+.\Publish.ps1 -OutputRoot "C:\codex"
 ```
+
+Numer wersji zmienia się w `Todis.AutoScript/Todis.AutoScript.csproj`:
+
+```xml
+<Version>1.0.0</Version>
+<AssemblyVersion>1.0.0.0</AssemblyVersion>
+<FileVersion>1.0.0.0</FileVersion>
+```
+
+Stosuj wersjonowanie `MAJOR.MINOR.PATCH`, np. `1.0.0`, `1.1.0`, `1.1.1`. Każda wersja otrzyma osobny katalog i nie nadpisze poprzedniego wydania.
 
 Przekaż użytkownikowi cały wygenerowany katalog, nie tylko EXE. Paczka zawiera program i folder `Scripts`. Jest samodzielna dla 64-bitowego Windows — nie wymaga instalowania .NET.
 
